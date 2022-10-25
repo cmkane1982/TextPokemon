@@ -11,6 +11,7 @@ void combatDisplay(Pokemon* myPokemon, Pokemon* enemyPokemon);
 int displayInventory(Inventory myInv);
 int displayMoves(Pokemon *pokemon);
 int displayPokemon(Character* myChar);
-void attack(Pokemon* myChar, Pokemon* myRival, int attackNum);
+void myAttack(Pokemon* myChar, Pokemon* myRival, int attackNum);
+void enemyAttack(Pokemon* myChar, Pokemon* myRival);
 
 #endif

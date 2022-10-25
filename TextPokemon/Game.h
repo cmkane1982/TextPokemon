@@ -9,10 +9,12 @@
 #include "Rival.h"
 #include "Pokemart.h"
 #include "Battle.h"
+#include "Gym.h"
 
 class Game:
 	public Pokemon,
-	public Inventory
+	public Inventory,
+	public Gym
 {
 private:
 	Character myChar;
@@ -20,8 +22,6 @@ private:
 
 public:
 	void beginGame();
-	void createChar(std::string name);
-	void createRival(std::string name);
 	enum
 	{
 		BULBASAUR, IVYSAUR, VENUSAUR, CHARMANDER, CHARMELEON, CHARIZARD, SQUIRTLE, WARTORTLE, BLASTOISE, CATERPIE, METAPOD, BUTTERFREE, WEEDLE, KAKUNA, BEEDRILL, PIDGEY, PIDGEOTTO,

@@ -5,12 +5,20 @@ Type::Type()
 	this->type = "NONE";
 }
 
+Type::Type(std::string type, std::vector <std::string> weakness, std::vector <std::string> resist, std::vector <std::string> immune)
+{
+	this->type = type;
+	this->weakness = weakness;
+	this->resist = resist;
+	this->immune = immune;
+}
+
 Type::~Type()
 {
 
 }
 
-void Type::popTypes()
+void Type::initTypes()
 {
 	std::ifstream typeIn;
 	typeIn.open("Types.txt");
@@ -29,8 +37,6 @@ void Type::popTypes()
 	{
 		while (std::getline(typeIn, line))
 		{
-			Type temp;
-
 			str.str(line);
 			str >> name;
 			str >> type;
@@ -55,10 +61,7 @@ void Type::popTypes()
 			str.clear();
 			line.clear();
 
-			temp.setType(type);
-			temp.setWeakness(weaknessV);
-			temp.setResist(resistV);
-			temp.setImmune(immuneV);
+			Type temp(type, weaknessV, resistV, immuneV);
 
 			weaknessV.clear();
 			resistV.clear();

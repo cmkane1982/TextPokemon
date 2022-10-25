@@ -27,8 +27,8 @@ Skills::~Skills()
 
 void Skills::useSkill()
 {
-    if (numUses > 0)
-        numUses--;
+    if (this->numUses > 0)
+        this->numUses--;
 }
 
 void Skills::resetSkillUses()

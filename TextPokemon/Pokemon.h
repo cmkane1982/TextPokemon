@@ -54,8 +54,9 @@ public:
     inline int getSpDef() { return this->spDef; }
     inline int getSpeed() { return this->speed; }
     inline int getExp() { return this->exp; }
-    inline size_t getNumSkills() { return this->allMoves.size(); }
-    inline Skills getSkill(int index) { return this->allMoves.at(index); }
+    inline size_t getNumSkills() { return this->currMoves.size(); }
+    inline Skills* getSkill(int index) { return &this->currMoves.at(index); }
+    inline std::vector <Skills> getAllMoves() { return this->allMoves; }
     inline int getRate() { return this->capRate; }
     inline int getEvoLvl() { return this->evoLvl; }
     inline int getEvoPokemon() { return this->evoPokeIndex; }
@@ -66,10 +67,12 @@ public:
 
     // Functions
     void addSkill(Skills skill);
+    inline void addAllSkills(Skills skill) { this->allMoves.push_back(skill); }
     void gainExp(int exp);
     void levelUp();
     void levelUp(int level);
     void initPokemon();
+    inline void useMove(Skills* move) { move->useSkill(); }
 
     std::vector <Pokemon> allPokemon;
 };

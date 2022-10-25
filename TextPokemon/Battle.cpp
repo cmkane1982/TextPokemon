@@ -28,16 +28,19 @@ bool combat(Character *myChar, Rival *myRival)
         case 1:
             attackNum = displayMoves(myChar->getActivePokemon());
             if (attackNum != 0)
-                attack(myChar->getActivePokemon(), myRival->getActivePokemon(), attackNum);
+                myAttack(myChar->getActivePokemon(), myRival->getActivePokemon(), attackNum);
             break;
         case 2:
             pokemonNum = displayPokemon(myChar);
-            if (myChar->getPokemon().at(pokemonNum - 1).getHp() > 0)
-                myChar->setActivePokemon(pokemonNum - 1);
-            else
+            if (pokemonNum != 0)
             {
-                std::cout << "That Pokemon Has Fainted.\n";
-                waitEnter();
+                if (myChar->getPokemon().at(pokemonNum - 1).getHp() > 0)
+                    myChar->setActivePokemon(pokemonNum - 1);
+                else
+                {
+                    std::cout << "That Pokemon Has Fainted.\n";
+                    waitEnter();
+                }
             }
             break;
         case 3:
@@ -53,6 +56,8 @@ bool combat(Character *myChar, Rival *myRival)
             waitEnter();
             break;
         }
+
+        enemyAttack(myChar->getActivePokemon(), myRival->getActivePokemon());
 
         if (myChar->getActivePokemon()->getHp() <= 0)
         {
@@ -94,8 +99,6 @@ bool combat(Character *myChar, Rival *myRival)
             {
                 std::cout << "You Have No More Pokemon.\n";
                 waitEnter();
-                cls();
-                std::cout << myRival->getRivalName() << ": HAHAHAHA! LOSER! I TOLD YOU I'M BETTER!\n";
                 pokemonLeft = false;
                 victory = false;
             }
@@ -110,8 +113,6 @@ bool combat(Character *myChar, Rival *myRival)
             }
             else
             {
-                cls();
-                std::cout << myRival->getRivalName() << ": YOU CHEATED! THAT OLD FART GAVE ME A DUD POKEMON!\n";
                 pokemonLeft = false;
                 victory = true;
             }
@@ -158,7 +159,7 @@ bool combat(Character* myChar)
                 attackNum = displayMoves(myChar->getActivePokemon());
                 if (attackNum != 0)
                 {
-                    attack(myChar->getActivePokemon(), &randPokemon.allPokemon.at(randNum), attackNum);
+                    myAttack(myChar->getActivePokemon(), &randPokemon.allPokemon.at(randNum), attackNum);
                     myTurn = false;
 
                 }
@@ -260,7 +261,9 @@ int displayMoves(Pokemon* pokemon)
 
     for (int i = 0; i < pokemon->getNumSkills(); i++)
     {
-        moves += std::to_string(i + 1) + ": " + pokemon->getSkill(i).getSkillName() + " ";
+        moves += std::to_string(i + 1) + ": " + pokemon->getSkill(i)->getSkillName() +
+            " CP: " + std::to_string(pokemon->getSkill(i)->getSkillUses()) +
+            "/" + std::to_string(pokemon->getSkill(i)->getMaxSkillUses());
     }
 
     std::cout << std::setfill('=') << std::setw(70) << " " << std::endl;
@@ -329,12 +332,11 @@ void combatDisplay(Pokemon *myPokemon, Pokemon *enemyPokemon)
     std::cout << std::setfill('=') << std::setw(70) << " " << std::endl << std::endl;
 }
 
-void attack(Pokemon* myPokemon, Pokemon* enemyPokemon, int attackNum)
+void myAttack(Pokemon* myPokemon, Pokemon* enemyPokemon, int attackNum)
 {
     int damage;
     int defense;
     int attack;
-    int randAttack;
     int critRand = rand() % 255 + 1;
     double typeMult;
     double critMult;
@@ -343,8 +345,10 @@ void attack(Pokemon* myPokemon, Pokemon* enemyPokemon, int attackNum)
 
     attackNum--;
 
-    std::string attackType = myPokemon->getSkill(attackNum).getSkillType();
+    std::string attackType = myPokemon->getSkill(attackNum)->getSkillType();
     
+    myPokemon->useMove(myPokemon->getSkill(attackNum));
+
     if (attackType == "NORMAL" || attackType == "FIGHTING" || attackType == "FLYING" || attackType == "GROUND" ||
         attackType == "ROCK" || attackType == "BUG" || attackType == "GHOST" || attackType == "POISON" || attackType == "STEEL")
     {
@@ -364,13 +368,13 @@ void attack(Pokemon* myPokemon, Pokemon* enemyPokemon, int attackNum)
 
     for (size_t i = 0; i < enemyPokemon->getWeak().size() && !weak; i++)
     {
-        if (enemyPokemon->getWeak().at(i) == myPokemon->getSkill(attackNum).getSkillType())
+        if (enemyPokemon->getWeak().at(i) == myPokemon->getSkill(attackNum)->getSkillType())
             weak = true;
     }
 
     for (size_t i = 0; i < enemyPokemon->getResist().size() && !weak && !resist; i++)
     {
-        if (enemyPokemon->getResist().at(i) == myPokemon->getSkill(attackNum).getSkillType())
+        if (enemyPokemon->getResist().at(i) == myPokemon->getSkill(attackNum)->getSkillType())
             resist = true;
     }
 
@@ -382,9 +386,9 @@ void attack(Pokemon* myPokemon, Pokemon* enemyPokemon, int attackNum)
     else
         typeMult = 1;
 
-    std::cout << myPokemon->getName() << " attacks with " << myPokemon->getSkill(attackNum).getSkillName() << "\n";
+    std::cout << myPokemon->getName() << " attacks with " << myPokemon->getSkill(attackNum)->getSkillName() << "\n";
 
-    damage = (int)(((((2 * myPokemon->getLevel() * critMult) / 5 + 2) * myPokemon->getSkill(attackNum).getSkillPower() * attack / defense) / 25 + 2) * typeMult * (rand() % 38 + 217) / 255);
+    damage = (int)(((((2 * myPokemon->getLevel() * critMult) / 5 + 2) * myPokemon->getSkill(attackNum)->getSkillPower() * attack / defense) / 25 + 2) * typeMult * (rand() % 38 + 217) / 255);
 
     enemyPokemon->takeDamage(damage);
 
@@ -394,6 +398,19 @@ void attack(Pokemon* myPokemon, Pokemon* enemyPokemon, int attackNum)
         std::cout << "It is Not Very Effective.\n";
 
     std::cout << "It hits for " << damage << " damage.\n\n";
+}
+
+void enemyAttack(Pokemon* myPokemon, Pokemon* enemyPokemon)
+{
+    int damage;
+    int defense;
+    int attack;
+    int randAttack;
+    int critRand = rand() % 255 + 1;
+    double typeMult;
+    double critMult;
+    bool weak = false;
+    bool resist = false;
 
     if (enemyPokemon->getHp() > 0)
     {
@@ -401,7 +418,7 @@ void attack(Pokemon* myPokemon, Pokemon* enemyPokemon, int attackNum)
 
         randAttack = rand() % enemyPokemon->getNumSkills();
 
-        attackType = enemyPokemon->getSkill(randAttack).getSkillType();
+        std::string attackType = enemyPokemon->getSkill(randAttack)->getSkillType();
 
         if (attackType == "NORMAL" || attackType == "FIGHTING" || attackType == "FLYING" || attackType == "GROUND" ||
             attackType == "ROCK" || attackType == "BUG" || attackType == "GHOST" || attackType == "POISON" || attackType == "STEEL")
@@ -422,13 +439,13 @@ void attack(Pokemon* myPokemon, Pokemon* enemyPokemon, int attackNum)
 
         for (size_t i = 0; i < myPokemon->getWeak().size() && !weak; i++)
         {
-            if (myPokemon->getWeak().at(i) == enemyPokemon->getSkill(randAttack).getSkillType())
+            if (myPokemon->getWeak().at(i) == enemyPokemon->getSkill(randAttack)->getSkillType())
                 weak = true;
         }
 
         for (size_t i = 0; i < myPokemon->getResist().size() && !weak && !resist; i++)
         {
-            if (myPokemon->getResist().at(i) == enemyPokemon->getSkill(randAttack).getSkillType())
+            if (myPokemon->getResist().at(i) == enemyPokemon->getSkill(randAttack)->getSkillType())
                 resist = true;
         }
 
@@ -439,9 +456,9 @@ void attack(Pokemon* myPokemon, Pokemon* enemyPokemon, int attackNum)
         else
             typeMult = 1;
 
-        std::cout << enemyPokemon->getName() << " attacks with " << enemyPokemon->getSkill(randAttack).getSkillName() << "\n";
+        std::cout << enemyPokemon->getName() << " attacks with " << enemyPokemon->getSkill(randAttack)->getSkillName() << "\n";
 
-        damage = (int)(((((2 * enemyPokemon->getLevel() * critMult) / 5 + 2) * enemyPokemon->getSkill(randAttack).getSkillPower() * attack / defense) / 25 + 2) * typeMult * (rand() % 38 + 217) / 255);
+        damage = (int)(((((2 * enemyPokemon->getLevel() * critMult) / 5 + 2) * enemyPokemon->getSkill(randAttack)->getSkillPower() * attack / defense) / 25 + 2) * typeMult * (rand() % 38 + 217) / 255);
 
         myPokemon->takeDamage(damage);
 

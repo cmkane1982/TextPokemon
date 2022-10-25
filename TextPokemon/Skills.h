@@ -17,14 +17,19 @@ public:
     Skills(std::string name, std::string type, int power, int acc, int maxUses);
     Skills();
     virtual ~Skills();
-    void useSkill();
-    void resetSkillUses();
+
     inline std::string getSkillName() { return this->name; }
     inline std::string getSkillType() { return this->type; }
     inline int getSkillPower() { return this->power; }
     inline int getSkillAcc() { return this->acc; }
-    inline int getSkillUses() { return this->maxUses; }
-    std::vector <Skills> allSkills;
+    inline int getSkillUses() { return this->numUses; }
+    inline int getMaxSkillUses() { return this->maxUses; }
+    
+    void useSkill();
+    void resetSkillUses();
     void initSkills();
+
+    std::vector <Skills> allSkills;
+    
 };
 #endif

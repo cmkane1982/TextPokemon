@@ -14,6 +14,6 @@ public:
 	~Pokemart();
 	inline void addItem(Item item) { this->items.push_back(item); }
 	inline std::vector <Item> getItems() { return this->items; }
-	void popPokemart();
+	void initPokemart();
 };
 #endif // !__POKEMART_H__

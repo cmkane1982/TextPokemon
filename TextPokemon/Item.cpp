@@ -9,12 +9,21 @@ Item::Item()
 	this->numOwned = 0;
 }
 
+Item::Item(std::string name, std::string type, int sellPrice, int buyPrice)
+{
+	this->name = name;
+	this->type = type;
+	this->sellPrice = sellPrice;
+	this->buyPrice = buyPrice;
+	this->numOwned = 0;
+}
+
 Item::~Item()
 {
 
 }
 
-void Item::popItems()
+void Item::initItems()
 {
 	std::ifstream itemsIn;
 	itemsIn.open("Items.txt");
@@ -32,8 +41,6 @@ void Item::popItems()
 	{
 		while (std::getline(itemsIn, line))
 		{
-			Item temp;
-
 			str.str(line);
 			str >> name;
 			str >> type;
@@ -42,10 +49,7 @@ void Item::popItems()
 			str.clear();
 			line.clear();
 
-			temp.setItemName(name);
-			temp.setItemType(type);
-			temp.setItemSellPrice(sellPrice);
-			temp.setItemBuyPrice(buyPrice);
+			Item temp(name, type, sellPrice, buyPrice);
 
 			allItems.push_back(temp);
 		}

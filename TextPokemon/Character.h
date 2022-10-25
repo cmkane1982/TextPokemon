@@ -25,7 +25,6 @@ public:
 	inline std::string getCharName() { return this->name; }
 	inline int getMoney() { return this->money; }
 	inline std::vector <Pokemon> getPokemon() { return this->pokemon; }
-	//inline Pokemon getActivePokemon() { return this->activePokemon; }
 	inline Pokemon* getActivePokemon() { return &this->activePokemon; }
 	inline Inventory getInventory() { return this->inventory; }
 	inline void gainExp(int exp) { this->activePokemon.gainExp(exp); }

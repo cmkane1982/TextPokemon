@@ -10,9 +10,9 @@ Pokemart::~Pokemart()
 
 }
 
-void Pokemart::popPokemart()
+void Pokemart::initPokemart()
 {
-	popItems();
+	initItems();
 
 	for (size_t i = 0; i < this->items.size(); i++)
 	{

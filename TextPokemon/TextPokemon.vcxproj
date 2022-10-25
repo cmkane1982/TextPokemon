@@ -130,6 +130,7 @@
     <ClInclude Include="Character.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Battle.h" />
+    <ClInclude Include="Gym.h" />
     <ClInclude Include="Rival.h" />
     <ClInclude Include="Pokemart.h" />
     <ClInclude Include="Pokedex.h" />

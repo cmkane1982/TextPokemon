@@ -50,28 +50,28 @@ Pokemon::~Pokemon()
 
 void Pokemon::addSkill(Skills skill)
 {
-	/*if (this->skillV.size() + 1 > this->maxSkills)
+	if (this->currMoves.size() + 1 > this->maxSkills)
 	{
 		int userChoice;
 
 		std::cout << "Your Pokemon is trying to learn " << skill.getSkillName() << "\n";
 		std::cout << "However, your Pokemon can't learn more than 4 moves.\n";
 		std::cout << "Which move would you like to replace?\n\n";
-		for (size_t i = 0; i < this->skillV.size(); i++)
+		for (size_t i = 0; i < this->currMoves.size(); i++)
 		{
-			std::cout << std::to_string(i + 1) << ": " << this->skillV.at(i).getSkillName() << " ";
+			std::cout << std::to_string(i + 1) << ": " << this->currMoves.at(i).getSkillName() << " ";
 		}
 		std::cout << "\n\nPlease Choose (1-4 or 0 for None): ";
 		std::cin >> userChoice;
 		
 		if (userChoice != 0)
 		{
-			this->skillV.erase(this->skillV.begin() + (userChoice - 1));
-			this->skillV.push_back(skill);
+			this->currMoves.erase(this->currMoves.begin() + (userChoice - 1));
+			this->currMoves.push_back(skill);
 		}		
 	}
-	else*/
-		this->allMoves.push_back(skill);
+	else
+		this->currMoves.push_back(skill);
 }
 
 void Pokemon::gainExp(int exp)
@@ -120,7 +120,7 @@ void Pokemon::levelUp(int level)
 void Pokemon::initPokemon()
 {
 	initSkills();
-	popTypes();
+	initTypes();
 	std::ifstream pokemonIn;
 	pokemonIn.open("Pokemon.txt");
 
@@ -178,7 +178,6 @@ void Pokemon::initPokemon()
 			str.clear();
 			line.clear();
 			
-			
 			for (size_t i = 0; i < type.size(); i++)
 			{
 				auto it = find_if(this->allTypes.begin(), this->allTypes.end(), [type, i](Type& obj) {return obj.getType() == type.at(i); });
@@ -234,12 +233,14 @@ void Pokemon::initPokemon()
 					immune.erase(it);
 			}
 
-
 			Pokemon temp(name, type, weak, resist, immune, hp, atk, def, spAtk, spDef, speed, rate, evoLvl, evoPokeIndex, baseExp);
+
 			for (size_t i = 0; i < moves.size(); i++)
 			{
-				temp.addSkill(this->allSkills.at(moves.at(i)));
+				temp.addAllSkills(this->allSkills.at(moves.at(i)));
 			}
+
+			temp.addSkill(temp.allMoves.at(0));
 
 			allPokemon.push_back(temp);
 		}
