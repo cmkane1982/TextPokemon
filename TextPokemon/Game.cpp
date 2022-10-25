@@ -11,6 +11,7 @@ random battles
 
 #include "InclLib.h"
 #include "Game.h"
+#include "main.h"
 
 void Game::beginGame()
 {
@@ -24,17 +25,17 @@ void Game::beginGame()
 	std::cout << "Enter Name: ";
 	std::cin >> name;
 	this->myChar.setCharName(name);
-	system("CLS");
+	cls();
 	std::cout << "Prof. Oak: Ah, yes " << name << ". Now what was my worthless grandson's name again?\n\n";
 	std::cout << "Enter Rival Name: ";
 	std::cin >> name;
 	this->myRival.setRivalName(name);
-	system("CLS");
+	cls();
 	std::cout << "Prof. Oak: Now the time you have awaited. Choose your Pokemon:\n";
 	std::cout << "1: Bulbasaur 2: Charmander 3: Squirtle\n\n";
 	std::cout << "Please Choose (1 - 3): ";
 	std::cin >> userChoice;
-	system("CLS");
+	cls();
 	
 	switch (userChoice)
 	{
@@ -64,13 +65,31 @@ void Game::beginGame()
 	this->myChar.addItem(this->allItems.at(POTION), 10);
 	this->myChar.addItem(this->allItems.at(POKEBALL), 10);
 
-	std::cout << this->myRival.getRivalName() << ": Everyone knows " << this->myRival.getActivePokemon()->getName() << " is better. ";
+	std::cout << this->myRival.getRivalName() << ": Everyone knows " << this->myRival.getActivePokemon()->getName() << " is better! ";
 	std::cout << "My " << this->myRival.getActivePokemon()->getName() << " is going to destroy your " << this->myChar.getActivePokemon()->getName() << "!\n";
 
 	combat(&myChar, &myRival);
 	
-	std::cout << "Press Enter to continue...";
-	std::cin.ignore();
-	std::cin.get();
-	system("CLS");
+	waitEnter();
+	cls();
+
+	std::cout << "What Would you like to do?\n";
+	std::cout << "1. Challenge Gym Leader\n";
+	std::cout << "2. Hunt Wild Pokemon\n";
+	std::cout << "3. Goto PokeCenter\n";
+	std::cout << "Please Choose (1 - 3): ";
+	std::cin >> userChoice;
+
+	switch (userChoice)
+	{
+	case 1:
+		break;
+	case 2:
+		combat(&myChar);
+		break;
+	case 3:
+		break;
+	default:
+		break;
+	}
 }

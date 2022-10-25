@@ -1,13 +1,140 @@
 
 #include "Battle.h"
+#include "main.h"
 
-void combat(Character *myChar, Rival *myRival)
+bool combat(Character *myChar, Rival *myRival)
 {   
     std::cout << "\n" << myRival->getRivalName() << " attacks!\n\n";
 
-    std::cout << "Press Enter to Continue...";
-    std::cin.ignore();
-    std::cin.get();
+    waitEnter();
+
+    bool pokemonLeft = true;
+    bool victory;
+
+    while (pokemonLeft)
+    {
+        int userChoice;
+        int attackNum;
+        int itemNum;
+        int pokemonNum;
+
+        cls();
+        combatDisplay(myChar->getActivePokemon(), myRival->getActivePokemon());
+
+        std::cout << "Please Select (1 - 4): ";
+        std::cin >> userChoice;
+        switch (userChoice)
+        {
+        case 1:
+            attackNum = displayMoves(myChar->getActivePokemon());
+            if (attackNum != 0)
+                attack(myChar->getActivePokemon(), myRival->getActivePokemon(), attackNum);
+            break;
+        case 2:
+            pokemonNum = displayPokemon(myChar);
+            if (myChar->getPokemon().at(pokemonNum - 1).getHp() > 0)
+                myChar->setActivePokemon(pokemonNum - 1);
+            else
+            {
+                std::cout << "That Pokemon Has Fainted.\n";
+                waitEnter();
+            }
+            break;
+        case 3:
+            itemNum = displayInventory(myChar->getInventory());
+            //if (itemNum != 0)
+            break;
+        case 4:
+            std::cout << "You Cannot Run. Please Select Again.\n";
+            waitEnter();
+            break;
+        default:
+            std::cout << "Invalid Selection. Please Select Again.\n";
+            waitEnter();
+            break;
+        }
+
+        if (myChar->getActivePokemon()->getHp() <= 0)
+        {
+            bool livePokemon = false;
+
+            std::cout << myChar->getActivePokemon()->getName() << " Has Fainted.\n";
+            
+            for (size_t i = 0; i < myChar->getPokemon().size() && !livePokemon; i++)
+            {
+                if (myChar->getPokemon().at(i).getHp() > 0)
+                    livePokemon = true;
+            }
+
+            if (livePokemon)
+            {
+                bool validChoice = false;
+
+                do
+                {
+                    pokemonNum = displayPokemon(myChar);
+                    if (pokemonNum == 0)
+                    {
+                        std::cout << "You Cannot Cancel.\n";
+                        waitEnter();
+                    }
+                    else if (myChar->getPokemon().at(pokemonNum - 1).getHp() > 0)
+                    {
+                        myChar->setActivePokemon(pokemonNum - 1);
+                        validChoice = true;
+                    }
+                    else
+                    {
+                        std::cout << "That Pokemon Has Fainted.\n";
+                        waitEnter();
+                    }
+                } while (!validChoice);
+            }
+            else
+            {
+                std::cout << "You Have No More Pokemon.\n";
+                waitEnter();
+                cls();
+                std::cout << myRival->getRivalName() << ": HAHAHAHA! LOSER! I TOLD YOU I'M BETTER!\n";
+                pokemonLeft = false;
+                victory = false;
+            }
+
+        }
+
+        if (myRival->getActivePokemon()->getHp() <= 0)
+        {
+            if (myRival->getPokemon().at(0).getHp() > 0)
+            {
+                myRival->setActivePokemon(0);
+            }
+            else
+            {
+                cls();
+                std::cout << myRival->getRivalName() << ": YOU CHEATED! THAT OLD FART GAVE ME A DUD POKEMON!\n";
+                pokemonLeft = false;
+                victory = true;
+            }
+        }
+    }
+
+    return victory;
+}
+
+bool combat(Character* myChar)
+{
+    Pokemon randPokemon;
+    int randNum;
+    int randLvl;
+
+    randLvl = rand() % 5 - (myChar->getActivePokemon()->getLevel() - 2);
+    randNum = rand() % 151;
+
+    randPokemon.allPokemon.at(randNum).levelUp(randLvl);
+
+    std::cout << "\nA Random " << randPokemon.allPokemon.at(randNum).getName() << " appears!\n\n";
+
+    waitEnter();
 
     bool pokemonLeft = true;
     bool myTurn = true;
@@ -19,8 +146,8 @@ void combat(Character *myChar, Rival *myRival)
         int itemNum;
         int pokemonNum;
 
-        system("CLS");
-        combatDisplay(myChar->getActivePokemon(), myRival->getActivePokemon());
+        cls();
+        combatDisplay(myChar->getActivePokemon(), &randPokemon.allPokemon.at(randNum));
         do
         {
             std::cout << "Please Select (1 - 4): ";
@@ -30,10 +157,10 @@ void combat(Character *myChar, Rival *myRival)
             case 1:
                 attackNum = displayMoves(myChar->getActivePokemon());
                 if (attackNum != 0)
-                {   
-                    attack(myChar, myRival, attackNum);
+                {
+                    attack(myChar->getActivePokemon(), &randPokemon.allPokemon.at(randNum), attackNum);
                     myTurn = false;
-                    
+
                 }
                 else
                 {
@@ -42,6 +169,10 @@ void combat(Character *myChar, Rival *myRival)
                 break;
             case 2:
                 pokemonNum = displayPokemon(myChar);
+                if (myChar->getPokemon().at(pokemonNum - 1).getHp() > 0)
+                    myChar->setActivePokemon(pokemonNum - 1);
+                else
+                    std::cout << "That Pokemon Has Fainted.\n";
                 break;
             case 3:
                 itemNum = displayInventory(myChar->getInventory());
@@ -62,12 +193,8 @@ void combat(Character *myChar, Rival *myRival)
                 break;
             }
         } while (myTurn);
-    }   
-}
-
-void combat(Character& myChar)
-{
-
+    }
+    return true;
 }
 
 int displayPokemon(Character* myChar)
@@ -80,7 +207,9 @@ int displayPokemon(Character* myChar)
 
         for (int i = 0; i < myChar->getPokemon().size(); i++)
         {
-            dispPokemon += std::to_string(i + 1) + ": " + myChar->getPokemon().at(i).getName() + "\n";
+            dispPokemon += std::to_string(i + 1) + ": " + myChar->getPokemon().at(i).getName() + 
+                " HP: " + std::to_string(myChar->getPokemon().at(i).getHp()) + " / " + 
+                std::to_string(myChar->getPokemon().at(i).getMaxHp()) + "\n";
         }
 
         std::cout << std::setfill('=') << std::setw(70) << " " << std::endl;
@@ -94,6 +223,8 @@ int displayPokemon(Character* myChar)
     }
     else
     {
+        std::cout << "You Have No Other Pokemon\n";
+        waitEnter();
         userChoice = 0;
     }
 
@@ -198,7 +329,7 @@ void combatDisplay(Pokemon *myPokemon, Pokemon *enemyPokemon)
     std::cout << std::setfill('=') << std::setw(70) << " " << std::endl << std::endl;
 }
 
-void attack(Character* myChar, Rival* myRival, int attackNum)
+void attack(Pokemon* myPokemon, Pokemon* enemyPokemon, int attackNum)
 {
     int damage;
     int defense;
@@ -212,34 +343,34 @@ void attack(Character* myChar, Rival* myRival, int attackNum)
 
     attackNum--;
 
-    std::string attackType = myChar->getActivePokemon()->getSkill(attackNum).getSkillType();
+    std::string attackType = myPokemon->getSkill(attackNum).getSkillType();
     
     if (attackType == "NORMAL" || attackType == "FIGHTING" || attackType == "FLYING" || attackType == "GROUND" ||
         attackType == "ROCK" || attackType == "BUG" || attackType == "GHOST" || attackType == "POISON" || attackType == "STEEL")
     {
-        defense = myRival->getActivePokemon()->getDef();
-        attack = myChar->getActivePokemon()->getAtk();
+        defense = enemyPokemon->getDef();
+        attack = myPokemon->getAtk();
     }
     else
     {
-        defense = myRival->getActivePokemon()->getSpDef();
-        attack = myChar->getActivePokemon()->getSpAtk();
+        defense = enemyPokemon->getSpDef();
+        attack = myPokemon->getSpAtk();
     }
 
-    if (critRand < myChar->getActivePokemon()->getSpeed() / 2)
-        critMult = (2 * myChar->getActivePokemon()->getLevel() + 5) / (myChar->getActivePokemon()->getLevel() + 5);
+    if (critRand < myPokemon->getSpeed() / 2)
+        critMult = (2.0 * myPokemon->getLevel() + 5) / (myPokemon->getLevel() + 5);
     else
         critMult = 1;
 
-    for (size_t i = 0; i < myRival->getActivePokemon()->getWeak().size() && !weak; i++)
+    for (size_t i = 0; i < enemyPokemon->getWeak().size() && !weak; i++)
     {
-        if (myRival->getActivePokemon()->getWeak().at(i) == myChar->getActivePokemon()->getSkill(attackNum).getSkillType())
+        if (enemyPokemon->getWeak().at(i) == myPokemon->getSkill(attackNum).getSkillType())
             weak = true;
     }
 
-    for (size_t i = 0; i < myRival->getActivePokemon()->getResist().size() && !weak && !resist; i++)
+    for (size_t i = 0; i < enemyPokemon->getResist().size() && !weak && !resist; i++)
     {
-        if (myRival->getActivePokemon()->getResist().at(i) == myChar->getActivePokemon()->getSkill(attackNum).getSkillType())
+        if (enemyPokemon->getResist().at(i) == myPokemon->getSkill(attackNum).getSkillType())
             resist = true;
     }
 
@@ -251,11 +382,11 @@ void attack(Character* myChar, Rival* myRival, int attackNum)
     else
         typeMult = 1;
 
-    std::cout << myChar->getCharName() << " attacks with " << myChar->getActivePokemon()->getSkill(attackNum).getSkillName() << "\n";
+    std::cout << myPokemon->getName() << " attacks with " << myPokemon->getSkill(attackNum).getSkillName() << "\n";
 
-    damage = (int)(((((2 * myChar->getActivePokemon()->getLevel() * critMult) / 5 + 2) * myChar->getActivePokemon()->getSkill(attackNum).getSkillPower() * attack / defense) / 15 + 2) * typeMult * (rand() % 38 + 217) / 255);
+    damage = (int)(((((2 * myPokemon->getLevel() * critMult) / 5 + 2) * myPokemon->getSkill(attackNum).getSkillPower() * attack / defense) / 25 + 2) * typeMult * (rand() % 38 + 217) / 255);
 
-    myRival->getActivePokemon()->takeDamage(damage);
+    enemyPokemon->takeDamage(damage);
 
     if (weak)
         std::cout << "It is Super Effective!\n";
@@ -264,63 +395,65 @@ void attack(Character* myChar, Rival* myRival, int attackNum)
 
     std::cout << "It hits for " << damage << " damage.\n\n";
 
-    critRand = rand() % 255 + 1;
-
-    randAttack = rand() % myRival->getActivePokemon()->getNumSkills();
-
-    attackType = myRival->getActivePokemon()->getSkill(randAttack).getSkillType();
-
-    if (attackType == "NORMAL" || attackType == "FIGHTING" || attackType == "FLYING" || attackType == "GROUND" ||
-        attackType == "ROCK" || attackType == "BUG" || attackType == "GHOST" || attackType == "POISON" || attackType == "STEEL")
+    if (enemyPokemon->getHp() > 0)
     {
-        defense = myChar->getActivePokemon()->getDef();
-        attack = myRival->getActivePokemon()->getAtk();
+        critRand = rand() % 255 + 1;
+
+        randAttack = rand() % enemyPokemon->getNumSkills();
+
+        attackType = enemyPokemon->getSkill(randAttack).getSkillType();
+
+        if (attackType == "NORMAL" || attackType == "FIGHTING" || attackType == "FLYING" || attackType == "GROUND" ||
+            attackType == "ROCK" || attackType == "BUG" || attackType == "GHOST" || attackType == "POISON" || attackType == "STEEL")
+        {
+            defense = myPokemon->getDef();
+            attack = enemyPokemon->getAtk();
+        }
+        else
+        {
+            defense = myPokemon->getSpDef();
+            attack = enemyPokemon->getSpAtk();
+        }
+
+        if (critRand < enemyPokemon->getSpeed() / 2)
+            critMult = (2.0 * enemyPokemon->getLevel() + 5) / (enemyPokemon->getLevel() + 5);
+        else
+            critMult = 1;
+
+        for (size_t i = 0; i < myPokemon->getWeak().size() && !weak; i++)
+        {
+            if (myPokemon->getWeak().at(i) == enemyPokemon->getSkill(randAttack).getSkillType())
+                weak = true;
+        }
+
+        for (size_t i = 0; i < myPokemon->getResist().size() && !weak && !resist; i++)
+        {
+            if (myPokemon->getResist().at(i) == enemyPokemon->getSkill(randAttack).getSkillType())
+                resist = true;
+        }
+
+        if (weak)
+            typeMult = 1.5;
+        else if (resist)
+            typeMult = 0.5;
+        else
+            typeMult = 1;
+
+        std::cout << enemyPokemon->getName() << " attacks with " << enemyPokemon->getSkill(randAttack).getSkillName() << "\n";
+
+        damage = (int)(((((2 * enemyPokemon->getLevel() * critMult) / 5 + 2) * enemyPokemon->getSkill(randAttack).getSkillPower() * attack / defense) / 25 + 2) * typeMult * (rand() % 38 + 217) / 255);
+
+        myPokemon->takeDamage(damage);
+
+        if (weak)
+            std::cout << "It is Super Effective!\n";
+        else if (resist)
+            std::cout << "It is Not Very Effective.\n";
+
+        std::cout << "It hits for " << damage << " damage.\n";
     }
     else
-    {
-        defense = myChar->getActivePokemon()->getSpDef();
-        attack = myRival->getActivePokemon()->getSpAtk();
-    }
+        std::cout << enemyPokemon->getName() << " Has Fainted.\n";
 
-    if (critRand < myRival->getActivePokemon()->getSpeed() / 2)
-        critMult = (2 * myRival->getActivePokemon()->getLevel() + 5) / (myRival->getActivePokemon()->getLevel() + 5);
-    else
-        critMult = 1;
-
-    for (size_t i = 0; i < myChar->getActivePokemon()->getWeak().size() && !weak; i++)
-    {
-        if (myChar->getActivePokemon()->getWeak().at(i) == myRival->getActivePokemon()->getSkill(randAttack).getSkillType())
-            weak = true;
-    }
-
-    for (size_t i = 0; i < myChar->getActivePokemon()->getResist().size() && !weak && !resist; i++)
-    {
-        if (myChar->getActivePokemon()->getResist().at(i) == myRival->getActivePokemon()->getSkill(randAttack).getSkillType())
-            resist = true;
-    }
-
-    if (weak)
-        typeMult = 1.5;
-    else if (resist)
-        typeMult = 0.5;
-    else
-        typeMult = 1;
-
-    std::cout << myRival->getRivalName() << " attacks with " << myRival->getActivePokemon()->getSkill(randAttack).getSkillName() << "\n";
-
-    damage = (int)(((((2 * myRival->getActivePokemon()->getLevel() * critMult) / 5 + 2) * myRival->getActivePokemon()->getSkill(randAttack).getSkillPower() * attack / defense) / 50 + 2) * typeMult * (rand() % 38 + 217) / 255);
-
-    myChar->getActivePokemon()->takeDamage(damage);
-
-    if (weak)
-        std::cout << "It is Super Effective!\n";
-    else if (resist)
-        std::cout << "It is Not Very Effective.\n";
-
-    std::cout << "It hits for " << damage << " damage.\n";
-
-
-    std::cout << "Press Enter to Continue...";
-    std::cin.ignore();
-    std::cin.get();
+    waitEnter();
 }
